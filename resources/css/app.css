@@ -1,0 +1,25 @@
+/* Import all your CSS files */
+@import './bootstrap.min.css';
+@import './splide.min.css';
+@import './slimselect.css';
+@import './plyr.css';
+@import './photoswipe.css';
+@import './default-skin.css';
+
+/* @import './admin.css';
+@import './main.css'; */
+
+button:disabled {
+    cursor: not-allowed;
+    pointer-events: all !important;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
