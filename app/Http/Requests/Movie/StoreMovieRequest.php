@@ -20,11 +20,11 @@ class StoreMovieRequest extends FormRequest
             'description' => 'nullable|string',
             'featured' => 'boolean',
             'premium' => 'boolean',
-            'episode_no' => 'required|integer|min:1|max:100',
+            'episode_number' => 'required|integer|min:1|max:100',
             'banner' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'categories' => 'required|array',
             'categories.*' => 'exists:categories,id',
-            'episodes' => 'required|array|size:' . $this->input('episode_no'),
+            'episodes' => 'required|array|size:' . $this->input('episode_number'),
             'episodes.*.video' => 'required|file|mimetypes:video/mp4,video/x-m4v,video/quicktime', // 100MB max
             'episodes.*.is_premium' => 'boolean',
         ];
@@ -42,7 +42,7 @@ class StoreMovieRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->input('episode_no') != count($this->file('episodes', []))) {
+            if ($this->input('episode_number') != count($this->file('episodes', []))) {
                 $validator->errors()->add('episodes', 'The number of uploaded episodes must match the episode count.');
             }
         });

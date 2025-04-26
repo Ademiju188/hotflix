@@ -1,7 +1,5 @@
 
 import React, { useEffect, useRef, FormEventHandler, useState } from 'react';
-import InputError from "@/components/input-error";
-import InputField from "@/components/input-field";
 import AppLayout from "@/layouts/app-layout";
 import { Head, useForm, router, Link } from "@inertiajs/react";
 import { LoaderCircle } from 'lucide-react';
@@ -70,9 +68,44 @@ const MovieIndex: React.FC<MovieProps>=({ movies }) => {
         };
     }, [searchQuery]);
 
-    const handleDelete = (movie:Object) => {
+    const handleDelete = async (movie: Movies) => {
+        // First warning
+        if (!confirm(`Are you sure you want to delete "${movie.title}"? This action cannot be undone.`)) {
+            return;
+        }
 
-    }
+        // Second warning with additional context
+        if (!confirm(`WARNING: This will permanently delete all episodes and associated files for "${movie.title}".\n\nType "DELETE" to confirm:`)) {
+            return;
+        }
+
+        // Final verification
+        const userInput = prompt(`Please type "DELETE ${movie.title}" to confirm permanent deletion:`);
+        if (userInput !== `DELETE ${movie.title}`) {
+            alert('Deletion cancelled. The series was NOT deleted.');
+            return;
+        }
+
+        try {
+
+            await router.delete(route('system.movie.destroy', movie.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // Update local state optimistically
+                    movies.data.map(mv =>
+                        mv.id === movie.id ? { ...mv, active: !mv.active } : mv
+                    );
+
+                    console.log(`"${movie.title}" has been permanently deleted`);
+                },
+                onError: (errors) => {
+                    console.error(`Failed to delete "${movie.title}": ${errors.message || 'Unknown error'}`);
+                }
+            });
+        } catch (error) {
+            console.error('Delete error:', error);
+        }
+    };
 
     const handleModal = (movie:Movies) => {
         setMovie(movie);
@@ -83,7 +116,9 @@ const MovieIndex: React.FC<MovieProps>=({ movies }) => {
 
         try {
 
-            await router.put(route('system.movie.status', movie.id), );
+            await router.put(route('system.movie.status', movie.id), {
+                preserveScroll: true,
+            });
 
             movies.data.map(mv =>
                 mv.id === movie.id ? { ...mv, active: !mv.active } : mv

@@ -23,10 +23,11 @@ Route::prefix('system')->middleware(['auth', 'superadmin'])->as('system.')->grou
         Route::get('/create', [MovieController::class, 'create'])->name('create');
         Route::post('/store', [MovieController::class, 'store'])->name('store');
         Route::get('/{movie:uuid}/edit', [MovieController::class, 'edit'])->name('edit');
-        Route::delete('/{episode:id}/delete', [MovieController::class, 'deleteEpisode'])->name('episode.destroy');
-        Route::delete('/{movie:id}/banner/delete', [MovieController::class, 'deleteBanner'])->name('banner.destroy');
         Route::put('/{movie:id}/status', [MovieController::class, 'updateMovieStatus'])->name('status');
         Route::put('/{episode:id}/status', [MovieController::class, 'updateStatus'])->name('episode.status');
         Route::post('/{movie:id}/update', [MovieController::class, 'update'])->name('update');
+        Route::delete('/{movie:id}/delete', [MovieController::class, 'destroy'])->name('destroy');
+        Route::delete('/{episode:id}/delete', [MovieController::class, 'deleteEpisode'])->name('episode.destroy');
+        Route::delete('/{movie:id}/banner/delete', [MovieController::class, 'deleteBanner'])->name('banner.destroy');
     });
 });

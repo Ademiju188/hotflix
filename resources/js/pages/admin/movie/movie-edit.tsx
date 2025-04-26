@@ -1,7 +1,7 @@
 import InputError from "@/components/input-error";
 import InputField from "@/components/input-field";
 import AppLayout from "@/layouts/app-layout";
-import { Head, router, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import { FormEventHandler, useEffect, useRef, useState } from "react";
 import { LoaderCircle } from 'lucide-react';
 import SlimSelect from 'slim-select';
@@ -48,7 +48,7 @@ type MovieForm = {
     description: string;
     featured: boolean;
     premium: boolean;
-    episode_no: number;
+    episode_number: number;
     banner: File | null;
     existing_banner: string | null,
     categories: number[];
@@ -60,17 +60,16 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [bannerThumbnail, setBannerThumbnail] = useState<string | null>(movie.banner);
     const [processing, setProcessing] = useState(false);
-    // const [progress, setProgress] = useState<number>(0);
+    const [errors, setErrors] = useState({});
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 
-    const [videoPreviews, setVideoPreviews] = useState<{ [key: string]: string }>(movie.episodes);
-
-    const { data, setData, post, errors, reset, progress } = useForm<MovieForm>({
+    const [videoPreviews, setVideoPreviews] = useState<{ [key: string]: string }>({});
+    const { data, setData, post, reset, progress } = useForm<MovieForm>({
         title: movie.title,
         description: movie.description,
         featured: movie.featured,
         premium: movie.premium,
-        episode_no: movie.episodes_count,
+        episode_number: movie.episodes_count,
         existing_banner: movie.banner_path,
         banner: null,
         categories: movie.categories.map(c => c.id),
@@ -89,8 +88,8 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
     });
 
     useEffect(() => {
-        // Update episodes array when episode_no changes
-        const newEpisodeCount = data.episode_no;
+        // Update episodes array when episode_number changes
+        const newEpisodeCount = data.episode_number;
         const currentEpisodeCount = data.episodes.length;
 
         if (newEpisodeCount > currentEpisodeCount) {
@@ -106,7 +105,7 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
             // Remove episodes (from the end)
             setData('episodes', data.episodes.slice(0, newEpisodeCount));
         }
-    }, [data.episode_no]);
+    }, [data.episode_number]);
 
     const handleFileChange = (field: keyof MovieForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -124,29 +123,6 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
             }
         }
     };
-
-    // const handleEpisodeVideoChange = (episodeId: string | number, e: React.ChangeEvent<HTMLInputElement>) => {
-    //     if (e.target.files && e.target.files[0]) {
-    //         const file = e.target.files[0];
-
-    //         if (!['video/mp4', 'video/x-m4v', 'video/quicktime'].includes(file.type)) {
-    //             alert('Only MP4, M4V, and QuickTime videos are allowed');
-    //             e.target.value = '';
-    //             return;
-    //         }
-
-    //         setData('episodes', data.episodes.map(episode =>
-    //             episode.id === episodeId
-    //                 ? { ...episode, video: file }
-    //                 : episode
-    //         ));
-
-    //         // Create and store preview URL separately
-    //         const previewUrl = URL.createObjectURL(file);
-    //         setVideoPreviews(prev => ({ ...prev, [episodeId.toString()]: previewUrl }));
-    //     }
-    // };
-
 
     const handleEpisodeVideoChange = (episodeId: string | number, e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -188,13 +164,45 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
         e.preventDefault();
         setProcessing(true);
 
+        // Frontend validation checks
+        const validationErrors: Record<string, string> = {};
+
+        if (!data.title.trim()) {
+            validationErrors.title = 'Title is required';
+        }
+
+        // if (!data.description.trim()) {
+        //     validationErrors.description = 'Description is required';
+        // }
+
+        if (data.categories.length === 0) {
+            validationErrors.categories = 'At least one category must be selected';
+        }
+
+        if (!data.banner && !movie?.banner_path) { // If editing, check existing banner
+            validationErrors.banner = 'Banner image is required';
+        }
+
+        data.episodes.forEach((episode, index) => {
+            if (!episode.video && !episode.existing_video) {
+                validationErrors[`episodes.${index}.video`] = 'Episode video is required';
+            }
+        });
+
+        // If validation errors exist, set them and return
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            setProcessing(false);
+            return;
+        }
+
         const formData = new FormData();
         // formData.append('_method', 'PUT'); // Important for Laravel to treat as PUT request
         formData.append('title', data.title);
         formData.append('description', data.description);
         formData.append('featured', data.featured ? '1' : '0');
         formData.append('premium', data.premium ? '1' : '0');
-        formData.append('episode_no', data.episode_no.toString());
+        formData.append('episode_number', data.episode_number.toString());
 
         if (data.banner) formData.append('banner', data.banner);
         else if (movie.banner_path) formData.append('existing_banner', movie.banner_path);
@@ -240,14 +248,16 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
         try {
             // If episode exists in backend (has numeric ID)
             if (typeof episodeId === 'number') {
-                await router.delete(route('system.movie.episode.destroy', episodeId));
+                await router.delete(route('system.movie.episode.destroy', episodeId), {
+                    preserveScroll: true,
+                });
             }
 
             // Remove from local state
             setData('episodes', data.episodes.filter((_, i) => i !== index));
 
             // Update episode numbers
-            setData('episode_no', data.episode_no - 1);
+            setData('episode_number', data.episode_number - 1);
 
         } catch (error) {
             console.error('Failed to delete episode:', error);
@@ -260,7 +270,9 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
         setProcessing(true);
 
         try {
-            await router.put(route('system.movie.episode.status', episode.id));
+            await router.put(route('system.movie.episode.status', episode.id), {}, {
+                preserveScroll: true,
+            });
 
             // Update local state to reflect the new status
             setData('episodes', data.episodes.map(ep =>
@@ -280,7 +292,8 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
         setProcessing(true);
 
         try {
-            await router.put(route('system.movie.banner.delete', movie.id), {}, {
+            await router.put(route('system.movie.banner.delete', movie.id), {},  {
+                preserveScroll: true,
                 onSuccess: () => {
                     setBannerThumbnail(null);
                     setData('banner', null);
@@ -406,21 +419,22 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
                                         <div className="sign__group">
                                             <label className="sign__label">No. of Episode:</label>
                                             <InputField
-                                                type='number'
-                                                name="episode_no"
-                                                value={data.episode_no}
+                                                type="number"
+                                                name="episode_number"
+                                                value={data.episode_number}
                                                 onChange={(field, value) => {
-                                                    const numValue = parseInt(value);
-                                                    if (!isNaN(numValue)) {
-                                                        setData(field, Math.max(1, numValue)); // Ensure at least 1 episode
+                                                    if (value === '') {
+                                                        setData(field, value); // allow empty string
+                                                    } else {
+                                                        const numValue = parseInt(value);
+                                                        if (!isNaN(numValue)) {
+                                                            setData(field, Math.max(1, numValue));
+                                                        }
                                                     }
                                                 }}
                                                 placeholder="No. of Episode"
-                                                error={errors.episode_no}
-                                                //  min="1"
-                                                // required
                                             />
-                                            <InputError message={errors.episode_no} />
+                                            <InputError message={errors.episode_number} />
                                         </div>
                                     </div>
 
@@ -508,21 +522,24 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            {videoPreviews[episode.id] && (
+
+                                                {videoPreviews[episode.id] ? (
                                                     <video
                                                         src={videoPreviews[episode.id]}
                                                         controls
                                                         style={{ maxWidth: '300px' }}
+                                                        key={`new-${episode.id}`} // Important for React reconciliation
                                                     />
-                                                )}
-
-                                                {/* Show existing video if no new upload */}
-                                                {!videoPreviews[episode.id] && episode.existing_video && (
-                                                    <video
-                                                        src={episode.existing_video}
-                                                        controls
-                                                        style={{ maxWidth: '300px' }}
-                                                    />
+                                                ) : (
+                                                    /* Otherwise show existing video if available */
+                                                    episode.existing_video && (
+                                                        <video
+                                                            src={episode.existing_video}
+                                                            controls
+                                                            style={{ maxWidth: '300px' }}
+                                                            key={`existing-${episode.id}`}
+                                                        />
+                                                    )
                                                 )}
                                             </div>
                                         </div>
@@ -531,6 +548,8 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
                             </div>
 
                             <div className="col-12 mt-4">
+                                <div className="d-flex justify-content-between">
+
                                 <button
                                     type="submit"
                                     className="sign__btn sign__btn--small"
@@ -545,6 +564,14 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
                                         <span>Publish</span>
                                     )}
                                 </button>
+
+                                <Link
+                                    href={route('system.movie.index')}
+                                    className="sign__btn sign__btn--small"
+                                > Cancel
+                                </Link>
+
+                                </div>
 
                                 {/* {uploadProgress > 0 && uploadProgress < 100 && (
                                     <div className="mt-4 text-white">

@@ -29,7 +29,7 @@ type MovieForm = {
     description: string;
     featured: boolean;
     premium: boolean;
-    episode_no: number;
+    episode_number: number;
     banner: File | null;
     categories: number[];
     // category: number | string;
@@ -41,16 +41,16 @@ const MovieCreate = ({ categories }: CategoryProps) => {
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [bannerThumbnail, setBannerThumbnail] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
-    // const [progress, setProgress] = useState<number>(0);
+    const [errors, setErrors] = useState({});
 
     const [videoPreviews, setVideoPreviews] = useState<{ [key: string]: string }>({});
 
-    const { data, setData, post, errors, reset, progress } = useForm<MovieForm>({
+    const { data, setData, post, reset, progress } = useForm<MovieForm>({
         title: '',
         description: '',
         featured: true,
         premium: false,
-        episode_no: 1,
+        episode_number: 1,
         banner: null,
         categories: [],
         // category: '',
@@ -62,8 +62,8 @@ const MovieCreate = ({ categories }: CategoryProps) => {
     });
 
     useEffect(() => {
-        // Update episodes array when episode_no changes
-        const newEpisodeCount = data.episode_no;
+        // Update episodes array when episode_number changes
+        const newEpisodeCount = data.episode_number;
         const currentEpisodeCount = data.episodes.length;
 
         if (newEpisodeCount > currentEpisodeCount) {
@@ -80,7 +80,7 @@ const MovieCreate = ({ categories }: CategoryProps) => {
             // Remove episodes (from the end)
             setData('episodes', data.episodes.slice(0, newEpisodeCount));
         }
-    }, [data.episode_no]);
+    }, [data.episode_number]);
 
     const handleFileChange = (field: keyof MovieForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -143,6 +143,38 @@ const MovieCreate = ({ categories }: CategoryProps) => {
         e.preventDefault();
         setProcessing(true);
 
+        // Frontend validation checks
+        const validationErrors: Record<string, string> = {};
+
+        if (!data.title.trim()) {
+            validationErrors.title = 'Title is required';
+        }
+
+        // if (!data.description.trim()) {
+        //     validationErrors.description = 'Description is required';
+        // }
+
+        if (data.categories.length === 0) {
+            validationErrors.categories = 'At least one category must be selected';
+        }
+
+        if (!data.banner) { // If editing, check existing banner
+            validationErrors.banner = 'Banner image is required';
+        }
+
+        data.episodes.forEach((episode, index) => {
+            if (!episode.video) {
+                validationErrors[`episodes.${index}.video`] = 'Episode video is required';
+            }
+        });
+
+        // If validation errors exist, set them and return
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            setProcessing(false);
+            return;
+        }
+
         try {
 
             const formData = new FormData();
@@ -150,7 +182,7 @@ const MovieCreate = ({ categories }: CategoryProps) => {
             formData.append('description', data.description);
             formData.append('featured', data.featured ? '1' : '0');
             formData.append('premium', data.premium ? '1' : '0');
-            formData.append('episode_no', data.episode_no.toString());
+            formData.append('episode_number', data.episode_number?.toString() || '1');
 
             if (data.banner) formData.append('banner', data.banner);
 
@@ -163,31 +195,15 @@ const MovieCreate = ({ categories }: CategoryProps) => {
                 }
             });
 
-            // await router.post(route('system.movie.store'), formData);
-
-
-            // const response = await axios.post(route('system.movie.store'), formData, {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data',
-            //     },
-            //     onUploadProgress: (progressEvent: ProgressEvent) => {
-            //         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            //         setProgress(percent);
-            //     },
-            // });
-
-            //   console.log('Upload success:', response.data);
 
             await post(route('system.movie.store'), { formData,
                 onSuccess: () => {
                     setProcessing(false);
-                    reset();
+                    // reset();
                 },
-                // onUploadProgress: () => {
-
-                // },
                 onError: (errors) => {
                     setProcessing(false);
+                    setErrors(errors);
                     console.error('Submission errors:', errors);
                 }
             });
@@ -297,21 +313,23 @@ const MovieCreate = ({ categories }: CategoryProps) => {
                                         <div className="sign__group">
                                             <label className="sign__label">No. of Episode:</label>
                                             <InputField
-                                                type='number'
-                                                name="episode_no"
-                                                //  value={data.episode_no}
+                                                type="number"
+                                                name="episode_number"
+                                                value={data.episode_number}
                                                 onChange={(field, value) => {
-                                                    const numValue = parseInt(value);
-                                                    if (!isNaN(numValue)) {
-                                                        setData(field, Math.max(1, numValue)); // Ensure at least 1 episode
+                                                    if (value === '') {
+                                                        setData(field, value); // allow empty string
+                                                    } else {
+                                                        const numValue = parseInt(value);
+                                                        if (!isNaN(numValue)) {
+                                                            setData(field, Math.max(1, numValue));
+                                                        }
                                                     }
                                                 }}
                                                 placeholder="No. of Episode"
-                                                error={errors.episode_no}
-                                                //  min="1"
-                                                // required
                                             />
-                                            <InputError message={errors.episode_no} />
+
+                                            <InputError message={errors.episode_number} />
                                         </div>
                                     </div>
 

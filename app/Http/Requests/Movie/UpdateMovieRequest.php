@@ -24,10 +24,10 @@ class UpdateMovieRequest extends FormRequest
         // dd(request()->all());
         return [
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             // 'featured' => 'boolean',
             // 'premium' => 'boolean',
-            'episode_no' => 'required|integer|min:1',
+            'episode_number' => 'required|integer|min:1',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'existing_banner' => 'nullable|string',
             'categories' => 'required|array',

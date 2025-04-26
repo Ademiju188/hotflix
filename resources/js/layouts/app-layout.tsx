@@ -38,6 +38,7 @@ interface AppLayoutProps {
     mainTitle: boolean
 }
 
+
 const AppLayout: React.FC<AppLayoutProps> = ({ children, title, mainTitle = true }) => {
     const { props } = usePage<PageProps>();
     const { auth, message } = props;

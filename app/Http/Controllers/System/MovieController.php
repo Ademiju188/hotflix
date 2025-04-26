@@ -62,7 +62,7 @@ class MovieController extends Controller
                     'content_type' => 'series', // Force to series for mini-series
                     'featured' => $request->featured ?? false,
                     'premium' => $request->premium ?? false,
-                    'episode_count' => $request->episode_no,
+                    'episode_count' => $request->episode_number,
                 ];
 
                 // Store banner in movie directory
@@ -96,14 +96,14 @@ class MovieController extends Controller
                             'is_premium' => $episodeData['is_premium'] ?? false,
                         ]);
 
-                        $customName = 'episode-' . $episodeData['episode_number'] . '-' . Str::random(8);
+                        $customName = 'episode-' . $order . '-' . Str::random(8);
                         $extension = $episodeData['video']->getClientOriginalExtension();
                         $fileName = "{$customName}.{$extension}";
 
                         // Store episode video
                         if (isset($episodeData['video'])) {
-                            $episode->video_path = $episodeData['video']->store(
-                                "movies/{$movieDir}/episode-" . ($index + 1),
+                            $episode->video_path = $episodeData['video']->storeAs(
+                                "movies/{$movieDir}/episodes",
                                 $fileName,
                                 'public'
                             );
@@ -131,139 +131,6 @@ class MovieController extends Controller
         });
     }
 
-    // public function store(StoreMovieRequest $request)
-    // {
-    //     return DB::transaction(function () use ($request) {
-    //         try {
-    //             // Create slug-friendly movie directory name
-    //             $movieDir = Str::slug($request->title);
-
-    //             // Store main movie data
-    //             $movieData = $request->only([
-    //                 'title',
-    //                 'description',
-    //                 'content_type',
-    //                 'featured',
-    //                 'premium',
-    //                 'duration'
-    //             ]);
-
-    //             // Store banner in movie directory
-    //             if ($request->hasFile('banner')) {
-    //                 $bannerFile = $request->file('banner');
-    //                 $customName = Str::slug($request->input('title', 'movie')) . '-' . \Str::random(8);
-    //                 $extension = $bannerFile->getClientOriginalExtension();
-    //                 $fileName = "{$customName}.{$extension}";
-    //                 $movieData['banner_path'] = $request->file('banner')->storeAs(
-    //                     "movies/{$movieDir}/banners",
-    //                     $fileName,
-    //                     'public'
-    //                 );
-    //             }
-
-    //             // Store video (for single content type)
-    //             if ($request->content_type === 'single' && $request->hasFile('video')) {
-    //                 $movieData['video_path'] = $request->file('video')->store(
-    //                     "movies/{$movieDir}/videos",
-    //                     'public'
-    //                 );
-    //             }
-
-    //             $movie = Movie::create($movieData);
-
-    //             // Attach categories
-    //             if ($request->has('categories')) {
-    //                 $movie->categories()->attach($request->categories);
-    //             }
-
-    //             // Sync tags
-    //             // if ($request->has('tags')) {
-    //             //     $tagIds = [];
-    //             //     foreach ($request->tags as $tagData) {
-    //             //         $tag = Tag::firstOrCreate(['name' => $tagData['name']]);
-    //             //         $tagIds[] = $tag->id;
-    //             //     }
-    //             //     $movie->tags()->sync($tagIds);
-    //             // }
-
-    //             // Handle series content
-    //             if ($request->content_type === 'series' && $request->has('seasons')) {
-    //                 foreach ($request->seasons as $seasonIndex => $seasonData) {
-    //                     $season = new Series([
-    //                         'title' => $seasonData['title'],
-    //                         'movie_id' => $movie->id,
-    //                         'series_number' => $seasonIndex + 1,
-    //                     ]);
-
-    //                     // Store season poster
-    //                     if (isset($seasonData['poster'])) {
-    //                         $season->poster_path = $seasonData['poster']->store(
-    //                             "movies/{$movieDir}/seasons/season-" . ($seasonIndex + 1) . '/posters',
-    //                             'public'
-    //                         );
-    //                     }
-
-    //                     $season->save();
-
-    //                     // Store episodes
-    //                     if (isset($seasonData['episodes'])) {
-    //                         foreach ($seasonData['episodes'] as $episodeIndex => $episodeData) {
-    //                             $order = $episodeIndex + 1;
-    //                             $episode = new Episode([
-    //                                 'series_id' => $season->id,
-    //                                 'title' => $order,
-    //                                 'episode_number' => $order,
-    //                                 'is_premium' => $episodeData['is_premium'] ?? true,
-    //                             ]);
-
-    //                             // Store episode video
-    //                             if (isset($episodeData['video'])) {
-    //                                 $episode->video_path = $episodeData['video']->store(
-    //                                     "movies/{$movieDir}/seasons/season-" . ($seasonIndex + 1) . '/episodes/episode-' . ($episodeIndex + 1),
-    //                                     'public'
-    //                                 );
-    //                             }
-
-    //                             $episode->save();
-    //                         }
-    //                     }
-    //                 }
-    //             }
-
-    //             // return response()->json([
-    //             //     'message' => 'Movie created successfully',
-    //             //     'data' => $movie->load(['categories', 'tags', 'series.episodes'])
-    //             // ], 201);
-
-    //             session()->flash('success','Movie created successfully');
-
-    //             return redirect()->route('system.movie.index');
-
-    //         } catch (\Exception $e) {
-    //             // Clean up any uploaded files if an error occurs
-    //             if (isset($movieData['banner_path'])) {
-    //                 Storage::disk('public')->delete($movieData['banner_path']);
-    //             }
-    //             if (isset($movieData['video_path'])) {
-    //                 Storage::disk('public')->delete($movieData['video_path']);
-    //             }
-
-    //             if (isset($season) && isset($season->poster_path)) {
-    //                 Storage::disk('public')->delete($season->poster_path);
-    //             }
-
-    //             if (isset($episode) && isset($episode->video_path)) {
-    //                 Storage::disk('public')->delete($episode->video_path);
-    //             }
-
-    //             return response()->json([
-    //                 'message' => 'Failed to create movie',
-    //                 'error' => $e->getMessage()
-    //             ], 500);
-    //         }
-    //     });
-    // }
-
     public function edit(Movie $movie)
     {
         return Inertia::render('admin/movie/movie-edit', [
@@ -285,7 +152,7 @@ class MovieController extends Controller
             try {
                 // Update basic movie data
                 $movieData = $request->only([
-                    'title', 'description', 'episode_no'
+                    'title', 'description', 'episode_number'
                 ]);
                 // dd($request->hasFile('banner'));
                 // Handle banner update
@@ -317,8 +184,9 @@ class MovieController extends Controller
                 // Process episodes
                 $existingEpisodeIds = [];
 
-                foreach ($request->episodes as $episodeData) {
-                    $episodeData['episode_number'] = $episodeData['episode_number'] ?? 1;
+                foreach ($request->episodes as $index => $episodeData) {
+                    $order = $index+1;
+                    $episodeData['episode_number'] = $order;
 
                     // Update or create episode
                     $episode = $movie->episodes()->updateOrCreate(
@@ -464,5 +332,50 @@ class MovieController extends Controller
             session()->flash('error', "Failed to delete banner");
             return redirect()->route('system.movie.edit', $movie->uuid);
         }
+    }
+
+    public function destroy(Movie $movie)
+    {
+        DB::transaction(function () use ($movie) {
+            try {
+                // Get the movie directory path before deletion
+                $movieDir = Str::slug($movie->title);
+                $folderPath = "movies/{$movieDir}";
+
+                // Delete banner if exists
+                if ($movie->banner_path) {
+                    Storage::disk('public')->delete($movie->banner_path);
+                }
+
+                // Delete all episode videos and their records
+                $movie->episodes->each(function ($episode) {
+                    if ($episode->video_path) {
+                        Storage::disk('public')->delete($episode->video_path);
+                    }
+                    $episode->delete();
+                });
+
+                // Delete the movie record
+                $movie->delete();
+
+                // Delete the entire movie folder and all its contents
+                if (Storage::disk('public')->exists($folderPath)) {
+                    Storage::disk('public')->deleteDirectory($folderPath);
+                }
+
+                session()->flash('success', 'Movie, all episodes, and associated files deleted successfully');
+
+            } catch (\Exception $e) {
+                \Log::error('Failed to delete movie: ' . $e->getMessage(), [
+                    'movie_id' => $movie->id,
+                    'error' => $e
+                ]);
+
+                session()->flash('error', 'Failed to delete movie. Please try again.');
+                throw $e;
+            }
+        });
+
+        return redirect()->route('system.movie.index');
     }
 }
