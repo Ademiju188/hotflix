@@ -110,8 +110,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, mainTitle = true
     // Render the appropriate sidebar based on user role
     const renderSidebar = () => {
         if (!auth?.user) return null;
-
-        switch (auth.user.role_id) {
+        switch (auth.user.role.id) {
             case 1: // Admin
                 return (
                     <AdminSidebarLayout

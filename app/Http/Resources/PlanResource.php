@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EpisodeResource extends JsonResource
+class PlanResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,12 +17,13 @@ class EpisodeResource extends JsonResource
         return [
             'id'    =>  $this->id,
             'uuid'  =>  $this->uuid,
-            'title' =>  $this->title,
-            'episode_number' =>  $this->episode_number,
-            'video_path' =>  $this->video(),
-            'is_premium'  =>    $this->is_premium,
+            'plan_type'  =>    (new PlanTypeResource($this->planType)),
+            'description'   => $this->description,
+            'hierarchy' =>  $this->hierarchy,
+            'price' => $this->price,
             'active'  =>    $this->active,
-            'movie_banner'  => $this->movie->banner()
+            'slug'  =>  $this->slug,
+            'created_at' => $this->created_at->format('d M Y')
         ];
     }
 }

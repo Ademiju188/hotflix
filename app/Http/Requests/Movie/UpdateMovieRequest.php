@@ -52,11 +52,11 @@ class UpdateMovieRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            foreach ($this->input('episodes', []) as $index => $episode) {
-                if (empty($episode['video']) && empty($episode['existing_video'])) {
-                    $validator->errors()->add("episodes.$index.video", 'Either a new video or existing video must be provided');
-                }
-            }
+            // foreach ($this->input('episodes', []) as $index => $episode) {
+            //     if (empty($episode['video']) && empty($episode['existing_video'])) {
+            //         $validator->errors()->add("episodes.$index.video", 'Either a new video or existing video must be provided');
+            //     }
+            // }
 
             if (empty($this->file('banner')) && empty($this->input('existing_banner'))) {
                 $validator->errors()->add('banner', 'Either a new banner or existing banner must be provided');

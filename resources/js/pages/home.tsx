@@ -6,14 +6,14 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import MovieContents from '@/components/movie-contents';
 import ExclusiveOriginal from '@/components/exclusive-original';
 
-export default function Home() {
+export default function Home({ heroSliders }: HeroSliderProps) {
     const { auth } = usePage<SharedData>().props;
 
     return (
         <>
             <Head title="Home" />
             <GuestHeaderLayout>
-                <HeroSlider />
+                <HeroSlider sliders={heroSliders} />
                 <FilerWrapper />
                 <MovieContents />
                 <ExclusiveOriginal />

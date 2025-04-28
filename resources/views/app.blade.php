@@ -25,7 +25,7 @@
     <script src="{{ asset('assets/frontend/js/photoswipe.min.js') }}"></script>
     <script src="{{ asset('assets/frontend/js/photoswipe-ui-default.min.js') }}"></script> --}}
     {{-- <!-- <script src="{{ asset('assets/backend/js/slimselect.min.js') }}"></script> --> --}}
-	{{-- <!-- <script src="{{ asset('assets/backend/js/smooth-scrollbar.js') }}"></script> --> --}}
+	<script src="{{ asset('assets/frontend/js/smooth-scrollbar.js') }}"></script>
     <script src="{{ asset('assets/backend/js/admin.js') }}"></script>
     <script src="{{ asset('assets/frontend/js/main.js') }}"></script>
 

@@ -32,6 +32,12 @@ const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ side
             activeRoutes: ['system.category.index']
         },
         {
+            title: 'Pricing',
+            route: 'system.pricing.index',
+            icon: 'ti ti-cash',
+            activeRoutes: ['system.pricing.index']
+        },
+        {
             title: 'Movies',
             route: 'system.categories.index',
             icon: 'ti ti-movie',
@@ -47,6 +53,19 @@ const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ side
                     route: 'system.movie.index',
                     icon: 'ti ti-list'
                 }
+            ]
+        },
+        {
+            title: 'Settings',
+            route: 'system.settings.hero-slider.index',
+            icon: 'ti ti-settings',
+            activeRoutes: ['system.settings.hero-slider.index'],
+            subLinks: [
+                {
+                    title: 'Hero Slider',
+                    route: 'system.settings.hero-slider.index',
+                    icon: 'ti ti-movie'
+                },
             ]
         }
     ];

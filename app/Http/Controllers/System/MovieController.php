@@ -154,10 +154,9 @@ class MovieController extends Controller
                 $movieData = $request->only([
                     'title', 'description', 'episode_number'
                 ]);
-                // dd($request->hasFile('banner'));
+
                 // Handle banner update
-                if ($request->hasFile('banner') ) {
-                    // Store new banner first
+                if ($request->hasFile('banner')) {
                     $movieDir = Str::slug($movie->title);
                     $customName = Str::slug($request->input('title', 'movie')) . '-' . Str::random(8);
                     $extension = $request->file('banner')->getClientOriginalExtension();
@@ -172,9 +171,6 @@ class MovieController extends Controller
                     $newFiles['banner'] = $newBannerPath;
                     $movieData['banner_path'] = $newBannerPath;
                 }
-                // elseif ($request->has('existing_banner')) {
-                //     $movieData['banner_path'] = $request->existing_banner;
-                // }
 
                 $movie->update($movieData);
 
@@ -185,45 +181,55 @@ class MovieController extends Controller
                 $existingEpisodeIds = [];
 
                 foreach ($request->episodes as $index => $episodeData) {
-                    $order = $index+1;
+                    $order = $index + 1;
                     $episodeData['episode_number'] = $order;
 
-                    // Update or create episode
-                    $episode = $movie->episodes()->updateOrCreate(
-                        ['id' => $episodeData['id'] ?? null],
-                        [
-                            'episode_number' => $episodeData['episode_number'],
-                            'is_premium' => $episodeData['is_premium'] ?? false,
-                        ]
-                    );
+                    // Validate that new episodes have a video file
+                    if (empty($episodeData['id'])) {
+                        if (!isset($episodeData['video'])) {
+                            throw new \Exception("New episodes must include a video file");
+                        }
+                    }
 
-                    // Track existing episode IDs
-                    $existingEpisodeIds[] = $episode->id;
-
-                    // Handle video update if new file was uploaded
+                    // Handle video update first (before creating the episode)
+                    $videoPath = null;
                     if (isset($episodeData['video'])) {
                         $movieDir = Str::slug($movie->title);
                         $customName = 'episode-' . $episodeData['episode_number'] . '-' . Str::random(8);
                         $extension = $episodeData['video']->getClientOriginalExtension();
                         $fileName = "{$customName}.{$extension}";
 
-                        $newVideoPath = $episodeData['video']->storeAs(
+                        $videoPath = $episodeData['video']->storeAs(
                             "movies/{$movieDir}/episodes",
                             $fileName,
                             'public'
                         );
 
                         // Track new video file
-                        $newFiles['episodes'][$episode->id] = $newVideoPath;
-
-                        // Delete old video if exists (only after new one is successfully stored)
-                        if ($episode->video_path) {
-                            Storage::disk('public')->delete($episode->video_path);
-                        }
-
-                        $episode->video_path = $newVideoPath;
-                        $episode->save();
+                        $newFiles['episodes'][$episodeData['id'] ?? 'new_'.$index] = $videoPath;
                     }
+
+                    // Update or create episode
+                    $episode = $movie->episodes()->updateOrCreate(
+                        ['id' => $episodeData['id'] ?? null],
+                        [
+                            'title' => "EP{$order}",
+                            'episode_number' => $episodeData['episode_number'],
+                            'is_premium' => $episodeData['is_premium'] ?? false,
+                            'video_path' => $videoPath ?? $movie->episodes()->find($episodeData['id'])->video_path ?? null
+                        ]
+                    );
+
+                    if ($videoPath && !empty($episodeData['id'])) {
+                        // Delete old video if exists (only after new one is successfully stored)
+                        $oldEpisode = $movie->episodes()->find($episodeData['id']);
+                        if ($oldEpisode && $oldEpisode->video_path) {
+                            Storage::disk('public')->delete($oldEpisode->video_path);
+                        }
+                    }
+
+                    // Track existing episode IDs
+                    $existingEpisodeIds[] = $episode->id;
                 }
 
                 // Delete episodes that were removed
@@ -250,6 +256,20 @@ class MovieController extends Controller
             }
         });
     }
+
+    // Helper method to clean up uploaded files in case of failure
+    // private function cleanupUploadedFiles(array $newFiles)
+    // {
+    //     if ($newFiles['banner']) {
+    //         Storage::disk('public')->delete($newFiles['banner']);
+    //     }
+
+    //     foreach ($newFiles['episodes'] as $path) {
+    //         if ($path) {
+    //             Storage::disk('public')->delete($path);
+    //         }
+    //     }
+    // }
 
     /**
      * Clean up uploaded files when an error occurs

@@ -78,4 +78,9 @@ class Movie extends Model
         return asset('images/default-banner.jpg');
     }
 
+    public function scopeIsActive($query)
+    {
+        return $query->where('active', true);
+    }
+
 }

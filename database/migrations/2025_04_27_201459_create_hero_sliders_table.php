@@ -11,16 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('plans', function (Blueprint $table) {
+        Schema::create('hero_sliders', function (Blueprint $table) {
             $table->id();
-            $table->uuid()->unique();
-            $table->foreignId('plan_type_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->decimal('price', 20, 2);
-            $table->text('description')->nullable();
+            $table->foreignId('movie_id')->constrained()->cascadeOnDelete();
             $table->integer('hierarchy');
-            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
@@ -30,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('plans');
+        Schema::dropIfExists('hero_sliders');
     }
 };

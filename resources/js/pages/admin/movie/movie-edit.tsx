@@ -57,7 +57,7 @@ type MovieForm = {
 
 const MovieEdit = ({ categories, movie }: CategoryProps) => {
     const categorySelectRef = useRef<HTMLSelectElement>(null);
-    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<number[]>(movie.categories.map(c => c.id));
     const [bannerThumbnail, setBannerThumbnail] = useState<string | null>(movie.banner);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
@@ -310,6 +310,14 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
 
     useEffect(() => {
         if (categorySelectRef.current) {
+            if (selectedCategories.length > 0) {
+                Array.from(categorySelectRef.current.options).forEach((option) => {
+                    if (selectedCategories.includes(parseInt(option.value))) {
+                        option.selected = true;
+                    }
+                });
+            }
+
             const select = new SlimSelect({
                 select: categorySelectRef.current,
                 settings: {
@@ -326,14 +334,12 @@ const MovieEdit = ({ categories, movie }: CategoryProps) => {
                 }
             });
 
-            // Set initially selected categories
-            // select.set(selectedCategories.map(id => id.toString()));
-
             return () => {
                 select.destroy();
             };
         }
-    }, [selectedCategories]);
+    }, [categorySelectRef.current, selectedCategories]);
+
 
     return (
         <>
