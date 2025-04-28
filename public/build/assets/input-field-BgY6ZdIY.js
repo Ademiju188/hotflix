@@ -1,1 +1,0 @@
-import{j as t}from"./app-C2weOUhd.js";const x=({type:e="text",name:s,value:n,onChange:i,placeholder:a="",className:r="",error:l="",required:o=!1})=>t.jsx(t.Fragment,{children:t.jsx("input",{type:e,name:s,className:`sign__input ${r} ${l?"is-invalid":""}`,value:n,onChange:p=>i(s,p.target.value),placeholder:a,required:o})});export{x as I};
