@@ -28,4 +28,14 @@ class Plan extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+    public function scopeIsActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

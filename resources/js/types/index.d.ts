@@ -32,14 +32,12 @@ export interface SharedData {
 }
 
 export interface User {
-    user: {
-        id: number;
-        uuid: string;
-        name: string;
-        username: string;
-        email: string;
-        avatar?: string;
-        dashboard: string
-        [key: string]: unknown; // This allows for additional properties...
-    }
+    id: number;
+    uuid: string;
+    name: string;
+    username: string;
+    email: string;
+    avatar?: string;
+    dashboard: string
+    [key: string]: unknown; // This allows for additional properties...
 }

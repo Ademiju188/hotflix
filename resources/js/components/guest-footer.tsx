@@ -35,14 +35,12 @@ const GuestFooter = () => {
                             </Link>
 
                             <span className="footer__copyright">
-                                © HOTFLIX, 2019—2024 <br />
-                                Create by <a href="https://themeforest.net/user/dmitryvolkov/portfolio" target="_blank" rel="noopener noreferrer">Dmitry Volkov</a>
+                                © HOTFLIX 2025, All Right Reserved
                             </span>
 
                             <nav className="footer__nav">
-                                <Link href="/about">About Us</Link>
-                                <Link href="/contacts">Contacts</Link>
-                                <Link href="/privacy">Privacy policy</Link>
+                                <Link href={route('home')}>Home</Link>
+                                <Link href={route('pricing')}>Pricing</Link>
                             </nav>
 
                             <button

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Stripe\Stripe;
+use Stripe\StripeClient;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->app->bind(StripeClient::class, fn () => new StripeClient(env('STRIPE_SECRET_KEY')));
     }
 }

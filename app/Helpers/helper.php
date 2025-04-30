@@ -107,3 +107,32 @@ if (!function_exists('generateUniqueSlug')) {
         return $slug;
     }
 }
+
+if (!function_exists('calculateSubscriptionDates')) {
+    /**
+     * Calculate subscription start and end dates
+     *
+     * @param int|null $durationDays Null means lifetime subscription
+     * @param string|null $startDate Custom start date (optional)
+     * @return array
+     */
+    function calculateSubscriptionDates(?int $durationDays, ?string $startDate = null): array
+    {
+        $start = $startDate ? Carbon::parse($startDate) : Carbon::now();
+
+        if ($durationDays === null) {
+            // Lifetime subscription
+            return [
+                'start_date' => $start->toDateString(),
+                'end_date' => null, // Null indicates lifetime access
+                'is_lifetime' => true
+            ];
+        }
+
+        return [
+            'start_date' => $start->toDateString(),
+            'end_date' => $start->copy()->addDays($durationDays)->toDateString(),
+            'is_lifetime' => false
+        ];
+    }
+}

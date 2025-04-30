@@ -14,16 +14,13 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
+            $table->string('trx_ref', 510)->nullable();
+            $table->string('plan_id')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 20, 2);
             $table->string('currency')->default('USD');
-            $table->string('payment_method');
-            $table->string('transaction_id')->nullable();
-            $table->enum('status', ['completed', 'failed', 'refunded']);
-            $table->timestamp('payment_date');
-            $table->text('notes')->nullable();
-            $table->json('api_response')->nullable();
+            $table->string('payment_method')->default('stripe');
+            $table->enum('status', ['completed', 'failed', 'pending'])->default('pending');
             $table->timestamps();
         });
     }

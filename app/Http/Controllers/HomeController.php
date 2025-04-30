@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\MovieResource;
+use App\Http\Resources\PlanResource;
+use App\Models\Plan;
 use Inertia\Inertia;
 use App\Models\Movie;
 use App\Models\HeroSlider;
@@ -31,6 +33,13 @@ class HomeController extends Controller
                     $query->where('active', true);
                 }
             ])->find($movie->id)),
+        ]);
+    }
+
+    public function pricing()
+    {
+        return Inertia::render('pricing', [
+            'pricingPlans'  =>  PlanResource::collection(Plan::with('planType')->orderBy('hierarchy')->get())
         ]);
     }
 }

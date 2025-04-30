@@ -10,6 +10,15 @@ class Subscription extends Model
 {
     protected $guarded = ['id'];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->user_id = user()->id;
+            $model->uuid  = generateUniqueUuid(self::class);
+        });
+    }
+
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',

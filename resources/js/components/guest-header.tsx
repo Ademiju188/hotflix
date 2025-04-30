@@ -1,9 +1,10 @@
 import { Link, usePage } from "@inertiajs/react";
-
+import { type User } from '@/types';
 
 export default function GuestHeader() {
-    const user = usePage.props?.auth?.user;
-    console.log(user)
+    const { props } = usePage<{ auth: { user: User } }>();
+    const user = props?.auth?.user;
+
     return (
         <>
             <header className="header">
@@ -47,7 +48,7 @@ export default function GuestHeader() {
                                     </button>
 
                                     <div className="header__profile">
-                                        {user !== undefined ?
+                                        {user ?
                                             ( <Link href={user.dashboard} className="header__sign-in header__sign-in--user"><span>Dashboard</span></Link>)
                                             :
                                             (<Link href={route('login')} className="header__sign-in header__sign-in--user"><span>Sign In</span></Link>)
