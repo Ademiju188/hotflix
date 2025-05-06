@@ -5,6 +5,7 @@ import { Head, router, useForm } from "@inertiajs/react";
 import { FormEventHandler, useEffect, useRef, useState } from "react";
 import { LoaderCircle } from 'lucide-react';
 import SlimSelect from 'slim-select';
+import axios from "axios";
 // import axios from 'axios';
 
 
@@ -43,6 +44,8 @@ const MovieCreate = ({ categories }: CategoryProps) => {
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
 
+    const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+
     const [videoPreviews, setVideoPreviews] = useState<{ [key: string]: string }>({});
 
     const { data, setData, post, reset, progress } = useForm<MovieForm>({
@@ -60,6 +63,12 @@ const MovieCreate = ({ categories }: CategoryProps) => {
             is_premium: false
         })),
     });
+
+    const BUNNY_CONFIG = {
+        storageZone: `library/420147/videos/ec29fc9b-a6f3-4597-b9bec3c420ab-0d9a-4573`,
+        apiKey: '281a2b29-7ed6-4614-80e4-296a48aeff423b9d27e6-bd99-4853-a9a3-51546efb278c',
+        cdnHost: 'https://your-pull-zone.b-cdn.net'
+    };
 
     useEffect(() => {
         // Update episodes array when episode_number changes
@@ -98,6 +107,7 @@ const MovieCreate = ({ categories }: CategoryProps) => {
             }
         }
     };
+
     const handleEpisodeVideoChange = (episodeId: string, e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -139,80 +149,116 @@ const MovieCreate = ({ categories }: CategoryProps) => {
         }));
     };
 
-    const handleSubmit: FormEventHandler = async (e) => {
-        e.preventDefault();
-        setProcessing(true);
-
-        // Frontend validation checks
-        const validationErrors: Record<string, string> = {};
-
-        if (!data.title.trim()) {
-            validationErrors.title = 'Title is required';
-        }
-
-        // if (!data.description.trim()) {
-        //     validationErrors.description = 'Description is required';
-        // }
-
-        if (data.categories.length === 0) {
-            validationErrors.categories = 'At least one category must be selected';
-        }
-
-        if (!data.banner) { // If editing, check existing banner
-            validationErrors.banner = 'Banner image is required';
-        }
-
-        data.episodes.forEach((episode, index) => {
-            if (!episode.video) {
-                validationErrors[`episodes.${index}.video`] = 'Episode video is required';
-            }
-        });
-
-        // If validation errors exist, set them and return
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            setProcessing(false);
-            return;
-        }
+    // Upload file to Bunny.net
+    const uploadToBunny = async (file: File, path: string, episodeId: string): Promise<string> => {
+        const url = `https://video.bunnycdn.com/${BUNNY_CONFIG.storageZone}`;
 
         try {
 
-            const formData = new FormData();
-            formData.append('title', data.title);
-            formData.append('description', data.description);
-            formData.append('featured', data.featured ? '1' : '0');
-            formData.append('premium', data.premium ? '1' : '0');
-            formData.append('episode_number', data.episode_number?.toString() || '1');
-
-            if (data.banner) formData.append('banner', data.banner);
-
-            data.categories.forEach(cat => formData.append('categories[]', cat.toString()));
-
-            data.episodes.forEach((episode, index) => {
-                if (episode.video) {
-                    formData.append(`episodes[${index}][video]`, episode.video);
-                    formData.append(`episodes[${index}][is_premium]`, episode.is_premium ? '1' : '0');
-                }
-            });
-
-
-            await post(route('system.movie.store'), { formData,
-                onSuccess: () => {
-                    setProcessing(false);
-                    // reset();
+            const response = await axios.post(`https://video.bunnycdn.com/library/420147/vidoes`, {
+                headers: {
+                    'AccessKey': `ec29fc9b-a6f3-4597-b9bec3c420ab-0d9a-4573`,
+                    'Content-Type': 'application/json'
                 },
-                onError: (errors) => {
-                    setProcessing(false);
-                    setErrors(errors);
-                    console.error('Submission errors:', errors);
-                }
+                // onUploadProgress: (progressEvent) => {
+                //     const percent = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+                //     setUploadProgress(prev => ({ ...prev, [episodeId]: percent }));
+                // }
             });
 
+            console.log(response);
+            // const response = await axios.put(url, file, {
+            //     headers: {
+            //         'AccessKey': BUNNY_CONFIG.apiKey,
+            //         'Content-Type': 'application/json'
+            //     },
+            //     onUploadProgress: (progressEvent) => {
+            //         const percent = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+            //         setUploadProgress(prev => ({ ...prev, [episodeId]: percent }));
+            //     }
+            // });
+
+            // return `${BUNNY_CONFIG.cdnHost}/${path}${file.name}`;
         } catch (error) {
-            setProcessing(false);
-            console.error('Submission error:', error);
+            console.error('Upload failed:', error);
+            throw error;
         }
     };
+
+    // const handleSubmit: FormEventHandler = async (e) => {
+    //     e.preventDefault();
+    //     setProcessing(true);
+
+    //     // Frontend validation checks
+    //     const validationErrors: Record<string, string> = {};
+
+    //     if (!data.title.trim()) {
+    //         validationErrors.title = 'Title is required';
+    //     }
+
+    //     // if (!data.description.trim()) {
+    //     //     validationErrors.description = 'Description is required';
+    //     // }
+
+    //     if (data.categories.length === 0) {
+    //         validationErrors.categories = 'At least one category must be selected';
+    //     }
+
+    //     if (!data.banner) { // If editing, check existing banner
+    //         validationErrors.banner = 'Banner image is required';
+    //     }
+
+    //     data.episodes.forEach((episode, index) => {
+    //         if (!episode.video) {
+    //             validationErrors[`episodes.${index}.video`] = 'Episode video is required';
+    //         }
+    //     });
+
+    //     // If validation errors exist, set them and return
+    //     if (Object.keys(validationErrors).length > 0) {
+    //         setErrors(validationErrors);
+    //         setProcessing(false);
+    //         return;
+    //     }
+
+    //     try {
+
+    //         const formData = new FormData();
+    //         formData.append('title', data.title);
+    //         formData.append('description', data.description);
+    //         formData.append('featured', data.featured ? '1' : '0');
+    //         formData.append('premium', data.premium ? '1' : '0');
+    //         formData.append('episode_number', data.episode_number?.toString() || '1');
+
+    //         if (data.banner) formData.append('banner', data.banner);
+
+    //         data.categories.forEach(cat => formData.append('categories[]', cat.toString()));
+
+    //         data.episodes.forEach((episode, index) => {
+    //             if (episode.video) {
+    //                 formData.append(`episodes[${index}][video]`, episode.video);
+    //                 formData.append(`episodes[${index}][is_premium]`, episode.is_premium ? '1' : '0');
+    //             }
+    //         });
+
+
+    //         await post(route('system.movie.store'), { formData,
+    //             onSuccess: () => {
+    //                 setProcessing(false);
+    //                 // reset();
+    //             },
+    //             onError: (errors) => {
+    //                 setProcessing(false);
+    //                 setErrors(errors);
+    //                 console.error('Submission errors:', errors);
+    //             }
+    //         });
+
+    //     } catch (error) {
+    //         setProcessing(false);
+    //         console.error('Submission error:', error);
+    //     }
+    // };
 
     useEffect(() => {
         if (categorySelectRef.current) {
@@ -237,6 +283,113 @@ const MovieCreate = ({ categories }: CategoryProps) => {
             };
         }
     }, []);
+
+
+
+    const handleSubmit: FormEventHandler = async (e) => {
+        e.preventDefault();
+        setProcessing(true);
+        setErrors({});
+
+        // Validation (keep your existing validation logic)
+        const validationErrors: Record<string, string> = {};
+        if (!data.title.trim()) validationErrors.title = 'Title is required';
+        if (data.categories.length === 0) validationErrors.categories = 'At least one category must be selected';
+        if (!data.banner) validationErrors.banner = 'Banner image is required';
+        data.episodes.forEach((episode, index) => {
+            if (!episode.video) validationErrors[`episodes.${index}.video`] = 'Episode video is required';
+        });
+
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            setProcessing(false);
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `https://video.bunnycdn.com/library/420147/collections`,
+                {
+                    name: data.title
+                },
+                {
+                    headers: {
+                        'AccessKey': 'ec29fc9b-a6f3-4597-b9bec3c420ab-0d9a-4573',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            for (const [index, episode] of data.episodes.entries()) {
+                if (episode.video) {
+                    const videoCreateResponse = await axios.post(
+                        `https://video.bunnycdn.com/library/420147/videos`,
+                        {
+                            title: `${data.title} - Episode ${index + 1}`,
+                            collectionId: response.data.guid
+                        },
+                        {
+                            headers: {
+                                'AccessKey': 'ec29fc9b-a6f3-4597-b9bec3c420ab-0d9a-4573',
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    const videoUploadResponse = await axios.put(
+                        `https://video.bunnycdn.com/library/420147/videos/${videoCreateResponse.data.guid}`,
+                        episode.video,
+                        {
+                            headers: {
+                                'AccessKey': 'ec29fc9b-a6f3-4597-b9bec3c420ab-0d9a-4573',
+                                'Content-Type': 'application/octet-stream'
+                            },
+                            onUploadProgress: (progressEvent) => {
+                                const percent = Math.round(
+                                    (progressEvent.loaded * 100) / (progressEvent.total || 1)
+                                );
+                                setUploadProgress(prev => ({ ...prev, [episode.id]: percent }));
+                            }
+                        }
+                    );
+
+                    console.log('Uploaded episode:', videoUploadResponse.data);
+                }
+            }
+            // 1. Upload banner to Bunny.net if exists
+            // let bannerUrl = '';
+            // if (data.banner) {
+            //     bannerUrl = await uploadToBunny(data.banner, 'banners/', 'banner');
+            // }
+
+            // 2. Upload episodes one by one
+            // const episodesWithUrls = [];
+            // for (const episode of data.episodes) {
+            //     if (episode.video) {
+            //         const videoUrl = await uploadToBunny(
+            //             episode.video,
+            //             `episodes/${Date.now()}/`,
+            //             episode.id
+            //         );
+            //         episodesWithUrls.push({
+            //             video: videoUrl,
+            //             is_premium: episode.is_premium
+            //         });
+            //     }
+            // }
+
+            // // 3. Send metadata to your server
+            // await post(route('system.movie.store'));
+
+        } catch (error) {
+            console.error('Submission error:', error);
+            setErrors({ general: 'An error occurred during upload. Please try again.' });
+        } finally {
+            setProcessing(false);
+        }
+    };
+
 
     return (
         <>
@@ -396,11 +549,28 @@ const MovieCreate = ({ categories }: CategoryProps) => {
                                                     </div>
                                                 </div>
 
+                                                <div className="col-12">
+
+                                                    {uploadProgress[episode.id] !== undefined && (
+                                                        <div className="mt-2">
+                                                            <div className="progress">
+                                                                <div
+                                                                    className="progress-bar bg-warning"
+                                                                    role="progressbar"
+                                                                    style={{ width: `${uploadProgress[episode.id]}%` }}
+                                                                    aria-valuemin="0" aria-valuemax="100">
+                                                                        {uploadProgress[episode.id]}%
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
                                                 {videoPreviews[episode.id] && (
                                                     <video
                                                         src={videoPreviews[episode.id]}
                                                         controls
-                                                        style={{ maxWidth: '300px' }}
+                                                        style={{ maxWidth: '300px', height: '100px' }}
                                                     />
                                                 )}
                                             </div>
@@ -425,14 +595,14 @@ const MovieCreate = ({ categories }: CategoryProps) => {
                                     )}
                                 </button>
 
-                                {progress && (
+                                {/* {progress && (
                                     <div className="mt-4 text-white">
                                         <p>Uploading: {progress.percentage}%</p>
                                         <div className="progress">
                                             <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${progress.percentage}%` }} aria-valuemin="0" aria-valuemax="100">{progress.percentage}%</div>
                                         </div>
                                     </div>
-                                )}
+                                )} */}
                             </div>
                         </div>
                     </form>

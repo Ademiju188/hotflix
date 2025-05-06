@@ -5,30 +5,29 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Laravel') }} - No More Coins</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.ico') }}" sizes="32x32">
+	<link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
     <link rel="stylesheet" href="{{ asset('assets/frontend/webfont/tabler-icons.min.css') }}">
+
     @routes
     @viteReactRefresh
-    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx", 'resources/css/app.css'])
+    @unless($page['component'] !== 'welcome')
+    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+    @else
+        @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx", 'resources/css/app.css'])
+    @endunless
     @inertiaHead
 </head>
 
-<body>
+<body class="scroll-smooth">
     @inertia
 
 
     <script src="{{ asset('assets/frontend/js/bootstrap.bundle.min.js') }}"></script>
-    {{-- <script src="{{ asset('assets/frontend/js/splide.min.js') }}"></script>
-    <script src="{{ asset('assets/frontend/js/slimselect.min.js') }}"></script>
-    <script src="{{ asset('assets/frontend/js/smooth-scrollbar.js') }}"></script> --}}
-    {{-- <script src="{{ asset('assets/frontend/js/plyr.min.js') }}"></script>
-    <script src="{{ asset('assets/frontend/js/photoswipe.min.js') }}"></script>
-    <script src="{{ asset('assets/frontend/js/photoswipe-ui-default.min.js') }}"></script> --}}
-    {{-- <!-- <script src="{{ asset('assets/backend/js/slimselect.min.js') }}"></script> --> --}}
 	<script src="{{ asset('assets/frontend/js/smooth-scrollbar.js') }}"></script>
     <script src="{{ asset('assets/backend/js/admin.js') }}"></script>
     <script src="{{ asset('assets/frontend/js/main.js') }}"></script>
-
 </body>
 
 </html>

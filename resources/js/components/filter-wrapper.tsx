@@ -1,52 +1,82 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import SlimSelect from 'slim-select';
 
 interface FilterWrapperProps {
-    // Add any props you need
+    categories: {
+        data: Array<{
+            id: number;
+            name: string;
+            slug: string;
+        }>;
+    };
+    filters?: {
+        category?: string;
+        sort?: string;
+        search?: string;
+    };
+    onFilterChange: (filters: { category?: string; sort?: string; search?: string }) => void;
 }
 
-const FilterWrapper: React.FC<FilterWrapperProps> = () => {
+const FilterWrapper: React.FC<FilterWrapperProps> = ({
+    categories,
+    filters = {},
+    onFilterChange
+}) => {
+    const [filterSideBar, setFilterSideBar] = useState(false);
+    const [localFilters, setLocalFilters] = useState({
+        category: filters.category || '',
+        sort: filters.sort || ''
+    });
+
     // Refs for select elements
-    const genreSelectRef = useRef<HTMLSelectElement>(null);
-    const qualitySelectRef = useRef<HTMLSelectElement>(null);
-    const rateSelectRef = useRef<HTMLSelectElement>(null);
-    const sortSelectRef = useRef<HTMLSelectElement>(null);
+    const genreSelectDesktopRef = useRef<HTMLSelectElement>(null);
+    const sortSelectDesktopRef = useRef<HTMLSelectElement>(null);
+    const genreSelectMobileRef = useRef<HTMLSelectElement>(null);
+    const sortSelectMobileRef = useRef<HTMLSelectElement>(null);
+
+    // Refs for SlimSelect instances
+    const genreSelectDesktop = useRef<SlimSelect | null>(null);
+    const sortSelectDesktop = useRef<SlimSelect | null>(null);
+    const genreSelectMobile = useRef<SlimSelect | null>(null);
+    const sortSelectMobile = useRef<SlimSelect | null>(null);
 
     // Initialize SlimSelect instances
     useEffect(() => {
-        if (genreSelectRef.current) {
-            new SlimSelect({
-                select: genreSelectRef.current,
-                settings: {
-                    showSearch: false, // Disable search if not needed
-                    placeholderText: 'All genres',
-                }
-            });
-        }
-
-        if (qualitySelectRef.current) {
-            new SlimSelect({
-                select: qualitySelectRef.current,
+        // Desktop selects
+        if (genreSelectDesktopRef.current) {
+            genreSelectDesktop.current = new SlimSelect({
+                select: genreSelectDesktopRef.current,
                 settings: {
                     showSearch: false,
-                    placeholderText: 'Any quality',
+                    placeholderText: 'All Categories',
                 }
             });
         }
 
-        if (rateSelectRef.current) {
-            new SlimSelect({
-                select: rateSelectRef.current,
+        if (sortSelectDesktopRef.current) {
+            sortSelectDesktop.current = new SlimSelect({
+                select: sortSelectDesktopRef.current,
                 settings: {
                     showSearch: false,
-                    placeholderText: 'Any rating',
+                    placeholderText: 'Relevance',
                 }
             });
         }
 
-        if (sortSelectRef.current) {
-            new SlimSelect({
-                select: sortSelectRef.current,
+        // Mobile selects
+        if (genreSelectMobileRef.current) {
+            genreSelectMobile.current = new SlimSelect({
+                select: genreSelectMobileRef.current,
+                settings: {
+                    showSearch: false,
+                    placeholderText: 'All Categories',
+                }
+            });
+        }
+
+        if (sortSelectMobileRef.current) {
+            sortSelectMobile.current = new SlimSelect({
+                select: sortSelectMobileRef.current,
                 settings: {
                     showSearch: false,
                     placeholderText: 'Relevance',
@@ -56,78 +86,160 @@ const FilterWrapper: React.FC<FilterWrapperProps> = () => {
 
         // Cleanup function
         return () => {
-            // Destroy SlimSelect instances if needed
+            [genreSelectDesktop.current, sortSelectDesktop.current, genreSelectMobile.current, sortSelectMobile.current].forEach(select => {
+                if (select) {
+                    select.destroy();
+                }
+            });
         };
     }, []);
 
+    // Sync select values when localFilters change
+    // useEffect(() => {
+    //     if (genreSelectDesktop.current) {
+    //         genreSelectDesktop.current.set(localFilters.category);
+    //     }
+    //     if (sortSelectDesktop.current) {
+    //         sortSelectDesktop.current.set(localFilters.sort);
+    //     }
+    //     if (genreSelectMobile.current) {
+    //         genreSelectMobile.current.set(localFilters.category);
+    //     }
+    //     if (sortSelectMobile.current) {
+    //         sortSelectMobile.current.set(localFilters.sort);
+    //     }
+    // }, [localFilters]);
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setLocalFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const applyFilters = () => {
+        onFilterChange(localFilters);
+        setFilterSideBar(false);
+    };
+
     return (
-        <div className="filter filter--fixed">
-            <div className="container">
-                <div className="row">
-                    <div className="col-12">
-                        <div className="filter__content">
-                            <button className="filter__menu" type="button">
-                                <i className="ti ti-filter"></i>Filter
-                            </button>
-
-                            <div className="filter__items">
-                                <select
-                                    ref={genreSelectRef}
-                                    className="filter__select"
-                                    name="genre"
-                                    id="filter__genre"
+        <>
+            {/* Desktop Filter */}
+            <div className="filter filter--fixed">
+                <div className="container">
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="filter__content">
+                                <button
+                                    className="filter__menu"
+                                    type="button"
+                                    onClick={() => setFilterSideBar(true)}
                                 >
-                                    <option value="0">All genres</option>
-                                    <option value="1">Action/Adventure</option>
-                                    <option value="2">Animals</option>
-                                    {/* ... other genre options ... */}
-                                </select>
+                                    <i className="ti ti-filter"></i>Filter
+                                </button>
 
-                                <select
-                                    ref={qualitySelectRef}
-                                    className="filter__select"
-                                    name="quality"
-                                    id="filter__quality"
-                                >
-                                    <option value="0">Any quality</option>
-                                    <option value="1">HD 1080</option>
-                                    <option value="2">HD 720</option>
-                                    <option value="3">DVD</option>
-                                    <option value="4">TS</option>
-                                </select>
+                                <div className="filter__items">
+                                    <select
+                                        ref={genreSelectDesktopRef}
+                                        className="filter__select"
+                                        name="category"
+                                        id="filter__genre_desktop"
+                                        value={localFilters.category}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value="">All Categories</option>
+                                        {categories.data.map(category => (
+                                            <option key={category.id} value={category.slug}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                                <select
-                                    ref={rateSelectRef}
-                                    className="filter__select"
-                                    name="rate"
-                                    id="filter__rate"
-                                >
-                                    <option value="0">Any rating</option>
-                                    <option value="1">from 3.0</option>
-                                    <option value="2">from 5.0</option>
-                                    <option value="3">from 7.0</option>
-                                    <option value="4">Golder Star</option>
-                                </select>
+                                    <select
+                                        ref={sortSelectDesktopRef}
+                                        className="filter__select"
+                                        name="sort"
+                                        id="filter__sort_desktop"
+                                        value={localFilters.sort}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value="">Relevance</option>
+                                        <option value="newest">Newest</option>
+                                        <option value="oldest">Oldest</option>
+                                    </select>
+                                </div>
 
-                                <select
-                                    ref={sortSelectRef}
-                                    className="filter__select"
-                                    name="sort"
-                                    id="filter__sort"
+                                <button
+                                    className="filter__btn"
+                                    type="button"
+                                    onClick={applyFilters}
                                 >
-                                    <option value="0">Relevance</option>
-                                    <option value="1">Newest</option>
-                                    <option value="2">Oldest</option>
-                                </select>
+                                    Apply
+                                </button>
                             </div>
-
-                            <button className="filter__btn" type="button">Apply</button>
-                            <span className="filter__amount">Showing 18 of 1713</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* Mobile Filter Sidebar */}
+            <div className={`mfilter ${filterSideBar ? 'mfilter--active' : ''}`}>
+                <div className="mfilter__head">
+                    <h6 className="mfilter__title">Filter</h6>
+                    <button
+                        className="mfilter__close"
+                        type="button"
+                        onClick={() => setFilterSideBar(false)}
+                    >
+                        <i className="ti ti-x"></i>
+                    </button>
+                </div>
+
+                <div className="mfilter__select-wrap">
+                    <div className="sign__group">
+                        <select
+                            ref={genreSelectMobileRef}
+                            className="filter__select"
+                            name="category"
+                            id="filter__genre_mobile"
+                            value={localFilters.category}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">All Categories</option>
+                            {categories.data.map(category => (
+                                <option key={category.id} value={category.slug}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="sign__group">
+                        <select
+                            ref={sortSelectMobileRef}
+                            className="filter__select"
+                            name="sort"
+                            id="filter__sort_mobile"
+                            value={localFilters.sort}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">Relevance</option>
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button
+                    className="mfilter__apply"
+                    type="button"
+                    onClick={applyFilters}
+                >
+                    Apply
+                </button>
+            </div>
+        </>
     );
 };
 

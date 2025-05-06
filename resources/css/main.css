@@ -1434,7 +1434,9 @@ body::-webkit-scrollbar-thumb {
   background-color: #000;
 }
 .item__cover img {
-  width: 100%;
+  width: 190px;
+  height: 200px;
+  object-fit: cover;
   transition: opacity 0.4s;
 }
 .item__cover:hover img {
@@ -4468,4 +4470,12 @@ body::-webkit-scrollbar-thumb {
   height: 4px !important;
   border-radius: 4px !important;
   cursor: pointer;
+}
+
+.image-container img {
+    /* width: 200px;       Set your desired width */
+    height: 300px;      /* Set your desired height */
+    object-fit: cover;  /* Prevents distortion, crops if necessary */
+    /* OR */
+    /* object-fit: contain;  Fits entire image, may leave empty space */
 }

@@ -20,4 +20,7 @@ interface HeroSliderProps extends PageProps {
     movies: {
         data: Movie[];
     };
+    categories: {
+        data: []
+    }
 }

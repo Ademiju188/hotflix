@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import '../../../css/admin.css';
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,7 +11,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ users_count, subscriptions_count, payments_count, series_count }) {
     const [sidebarActive, setSidebarActive] = useState(false);
     const [headerBtnActive, setHeaderBtnActive] = useState(false);
 
@@ -26,32 +26,32 @@ export default function Dashboard() {
             <AppLayout title='Dashboard' mainTitle={true}>
                 <div className="col-12 col-sm-6 col-xl-3">
                     <div className="stats">
-                        <span>Subscriptions this month</span>
-                        <p>1 678 <b className="green">+15</b></p>
-                        <i className="ti ti-diamond"></i>
+                        <span>Total Users</span>
+                        <p>{users_count}</p>
+                        <i className="ti ti-users"></i>
                     </div>
                 </div>
 
                 <div className="col-12 col-sm-6 col-xl-3">
                     <div className="stats">
-                        <span>Items added this month</span>
-                        <p>376 <b className="red">-44</b></p>
+                        <span>Total Series</span>
+                        <p>{series_count}</p>
                         <i className="ti ti-movie"></i>
                     </div>
                 </div>
 
                 <div className="col-12 col-sm-6 col-xl-3">
                     <div className="stats">
-                        <span>Views this month</span>
-                        <p>509 573 <b className="green">+3.1%</b></p>
-                        <i className="ti ti-eye"></i>
+                        <span>Total Payments</span>
+                        <p>{payments_count}</p>
+                        <i className="ti ti-cash"></i>
                     </div>
                 </div>
 
                 <div className="col-12 col-sm-6 col-xl-3">
                     <div className="stats">
-                        <span>Reviews this month</span>
-                        <p>642 <b className="green">+8</b></p>
+                        <span>Total Subscriptions</span>
+                        <p>{subscriptions_count}</p>
                         <i className="ti ti-star-half-filled"></i>
                     </div>
                 </div>

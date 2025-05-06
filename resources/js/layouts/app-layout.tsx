@@ -6,7 +6,8 @@ import AdminSidebarLayout from './app/admin-sidebar-layout';
 import Notification from '@/components/notification';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../css/admin.css';
+import useDynamicCss from '@/hooks/useDynamicCss';
+// import '../../css/admin.css';
 // import '../../css/admin.custom.css';
 
 // Define proper TypeScript interfaces
@@ -42,7 +43,7 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children, title, mainTitle = true }) => {
     const { props } = usePage<PageProps>();
     const { auth, message } = props;
-
+    useDynamicCss('/assets/backend/css/admin.css')
     const [sidebarActive, setSidebarActive] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const headerBtnRef = useRef<HTMLButtonElement>(null);
@@ -75,7 +76,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, mainTitle = true
             Object.entries(errors).forEach(([field, message]) => {
                 // Skip the general message since we already displayed it
                 if (field !== 'message') {
-                    toast.error(`${field}: ${message}`, {
+                    // Replace underscores with spaces and capitalize first letter
+                    const formattedField = field
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, char => char.toUpperCase());
+
+                    toast.error(`${formattedField}: ${message}`, {
                         toastId: `validation-error-${field}` // Prevent duplicates
                     });
                 }
@@ -119,14 +125,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, mainTitle = true
                         user={auth.user}
                     />
                 );
-            case 3: // Regular user
-                return (
-                    <AppSidebarLayout
-                        sidebarActive={sidebarActive}
-                        ref={sidebarRef}
-                        user={auth.user}
-                    />
-                );
+            // case 3: // Regular user
+            //     return (
+            //         <AppSidebarLayout
+            //             sidebarActive={sidebarActive}
+            //             ref={sidebarRef}
+            //             user={auth.user}
+            //         />
+            //     );
             default:
                 return null;
         }
@@ -151,7 +157,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, mainTitle = true
                 sidebarActive={sidebarActive}
                 toggleSidebar={toggleSidebar}
                 ref={headerBtnRef}
-                user={auth?.user}
             />
 
             {renderSidebar()}

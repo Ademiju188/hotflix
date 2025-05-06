@@ -158,7 +158,7 @@ const CategoryIndex: React.FC<CategoryIndexProps> = ({ categories }) => {
                                         <th>TITLE</th>
                                         <th>DESCRIPTION</th>
                                         <th>STATUS</th>
-                                        <th>CRAETED DATE</th>
+                                        <th>CREATED DATE</th>
                                         <th>ACTIONS</th>
                                     </tr>
                                 </thead>

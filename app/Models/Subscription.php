@@ -34,9 +34,9 @@ class Subscription extends Model
         return $this->belongsTo(Plan::class);
     }
 
-    public function payments(): HasMany
+    public function payment(): BelongsTo
     {
-        return $this->hasMany(Payment::class);
+        return $this->belongsTo(Payment::class);
     }
 
     public function isActive(): bool

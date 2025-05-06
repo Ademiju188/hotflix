@@ -38,6 +38,24 @@ export interface User {
     username: string;
     email: string;
     avatar?: string;
-    dashboard: string
-    [key: string]: unknown; // This allows for additional properties...
+    dashboard: string;
+    created_at: string;
+    verified: boolean;
+    [key: string]: unknown;
+    subscription: {
+        has_subscription: boolean;
+        message?: string;
+        cta?: {
+            text: string;
+            route: string;
+        };
+        plan_name?: string;
+        next_bill_date?: string;
+        amount?: number;
+        currency?: string;
+        payment_method?: string;
+        card_last_four?: string;
+        auto_renew?: boolean;
+        status?: string;
+    };
 }

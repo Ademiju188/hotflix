@@ -35,7 +35,7 @@ const MovieDetail = ({ movie }: MovieProps) => {
         <>
             <Head title="Home" />
             <GuestHeaderLayout>
-                <section className="section section--details">
+                <section className="section section--details" style={{ minHeight: '90vh' }}>
                     <div className="section__details-bg" data-bg="img/bg/details__bg.jpg"></div>
 
                     <div className="container">
@@ -49,24 +49,21 @@ const MovieDetail = ({ movie }: MovieProps) => {
                                     <div className="row">
                                         <div className="col-12 col-sm-5 col-md-5 col-lg-4 col-xl-6 col-xxl-5">
                                             <div className="item__cover">
-                                                <img src={movie.banner_path} alt={movie.title} />
-                                                {/* <span className="item__rate item__rate--green">8.4</span> */}
-                                                <button className="item__favorite item__favorite--static" type="button"><i className="ti ti-bookmark"></i></button>
+                                                <img src={movie.banner_path} alt={movie.title} style={{ width: '270px', height: '400px', objectFit: 'cover' }} />
                                             </div>
                                         </div>
 
                                         <div className="col-12 col-md-7 col-lg-8 col-xl-6 col-xxl-7">
                                             <div className="item__content">
-                                                <ul className="item__meta">
+                                                <ul className="item__meta mb-0 pb-0">
                                                     <li>
                                                         {movie.categories.map(category => (
                                                             <a href="#" key={category.id}>{category.name}</a>
                                                         ))}
                                                     </li>
                                                 </ul>
-
-                                                <div className="item__description">
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Similique, maiores? Accusamus harum quas quaerat, voluptatibus architecto, eos odio labore quibusdam ducimus recusandae dolore cupiditate assumenda aperiam adipisci molestiae. Laudantium culpa minus enim quis unde at corporis suscipit sit, voluptates officia. Sit impedit similique laboriosam quaerat neque nisi consequuntur, atque repellat aliquam nam temporibus. Ut sequi qui dolor dolorem nam unde tempora modi minima harum perferendis obcaecati iure, id quia eius vitae atque rerum sunt nulla, nisi facere? Accusantium praesentium laborum consequuntur laudantium! Molestias, omnis soluta blanditiis deserunt dolorem, ex expedita nam corrupti voluptas amet dicta doloribus atque cumque accusantium tenetur quibusdam quaerat magni nobis eum excepturi laboriosam neque quidem eaque assumenda. Voluptas quae itaque quis, aliquid ad iste dolorem nam adipisci tempora? Explicabo atque deserunt aliquam, ducimus, tempora necessitatibus culpa quisquam eius debitis hic voluptatibus inventore ex architecto aut ut! Vel non reprehenderit nemo unde dicta tempora quasi debitis impedit totam corrupti, eum voluptates, officiis iure repudiandae facilis quam nulla. Cum, at sequi, culpa debitis voluptates accusantium nesciunt enim odit neque rem eius rerum qui eos! Minus et ullam ea quae non iusto quos, est id perspiciatis maiores similique molestias atque quaerat numquam. Dolores molestiae nisi vel quas blanditiis totam!</p>
+                                                <div className="item__description pt-0 mt-0">
+                                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime harum dolor iste saepe deserunt! Aperiam, voluptatibus impedit! Veniam, iste quidem. Nisi vel repellat quidem iusto illo aperiam accusantium, obcaecati quasi.</p>
                                                 </div>
                                             </div>
                                         </div>

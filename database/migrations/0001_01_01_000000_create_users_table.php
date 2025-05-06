@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('avatar')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_block')->default(value: false);
+            $table->boolean('is_block')->default(false);
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

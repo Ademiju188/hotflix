@@ -1,0 +1,1 @@
+import{r}from"./app-BS6cv_Wc.js";const c=t=>{r.useEffect(()=>{const e=document.createElement("link");return e.rel="stylesheet",e.href=t,e.dataset.dynamic="true",document.head.appendChild(e),()=>{const n=document.querySelector(`link[href="${t}"]`);n&&n.remove()}},[t])};export{c as u};

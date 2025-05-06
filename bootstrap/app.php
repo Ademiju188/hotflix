@@ -17,13 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->encryptCookies(['appearance', 'sidebar_state']);
-        $middleware->redirectGuestsTo(fn () => route('login'));
-        // $middleware->redirectUsersTo(fn () => Auth::user()->re_route_dashboard());
+        // $middleware->encryptCookies(['appearance', 'sidebar_state']);
+        // $middleware->redirectGuestsTo(fn () => route('login'));
+        // $middleware->redirectUsersTo(fn () => user()->dashboard());
         $middleware->web()->statefulApi();
         $middleware->alias([
             'guest'       => \App\Http\Middleware\OnlyGuestAllowedMiddleware::class,
             'superadmin'  => \App\Http\Middleware\RedirectIfNotSuperAdmin::class,
+            'user'        =>  \App\Http\Middleware\RedirectIfNotUser::class,
         ]);
         $middleware->web(append: [
             HandleAppearance::class,

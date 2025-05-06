@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { User } from '@/types';
 
 interface SidebarLink {
@@ -16,7 +16,10 @@ interface AdminSidebarProps {
     currentRoute: string;
 }
 
-const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ sidebarActive, user, currentRoute = '' }, ref) => {
+const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ sidebarActive, user }, ref) => {
+
+    const currentRoute = usePage().props.ziggy?.currentRoute;
+
     // Main navigation links
     const mainLinks: SidebarLink[] = [
         {
@@ -54,6 +57,12 @@ const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ side
                     icon: 'ti ti-list'
                 }
             ]
+        },
+        {
+            title: 'Users',
+            route: 'system.user.index',
+            icon: 'ti ti-users',
+            activeRoutes: ['system.user.index']
         },
         {
             title: 'Settings',
@@ -101,7 +110,7 @@ const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ side
                         </a>
                         <ul className="dropdown-menu sidebar__dropdown-menu">
                             {link.subLinks.map((subLink, index) => (
-                                <li key={index}><Link href={route(subLink.route)}>{subLink.title}</Link></li>
+                                <li key={index} className={`${isActive(link.activeRoutes) ? 'sidebar__nav-link--active' : ''}`}><Link href={route(subLink.route)}>{subLink.title}</Link></li>
                             ))}
                         </ul>
                     </>
@@ -121,9 +130,9 @@ const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ side
     return (
         <div ref={ref} className={`sidebar ${sidebarActive ? 'sidebar--active' : ''}`}>
             {/* Logo */}
-            <Link href={route('system.dashboard')} className="sidebar__logo">
+            <Link href="/" className="sidebar__logo">
                 <img
-                    src="/assets/backend/img/logo.svg"
+                    src="/assets/backend/img/logo.png"
                     alt="Admin Logo"
                     width="120"
                     height="40"
@@ -166,16 +175,7 @@ const AdminSidebarLayout = forwardRef<HTMLDivElement, AdminSidebarProps>(({ side
 
             {/* Footer */}
             <div className="sidebar__copyright">
-                © HOTFLIX, 2019—{new Date().getFullYear()}. <br />
-                Created by{' '}
-                <a
-                    href="https://themeforest.net/user/dmitryvolkov/portfolio"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="sidebar__copyright-link"
-                >
-                    Dmitry Volkov
-                </a>
+                © {import.meta.env.VITE_APP_NAME}, 2025—{new Date().getFullYear()}.
             </div>
         </div>
     );

@@ -46,7 +46,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <div className="sign__content">
                                 <form onSubmit={submit} className="sign__form">
                                     <Link href="/" className="sign__logo">
-                                        <img src="/assets/frontend/img/logo.svg" alt="" />
+                                        <img src="/assets/frontend/img/logo.png" alt="" />
                                     </Link>
 
                                     <div className="sign__group">

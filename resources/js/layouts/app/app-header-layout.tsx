@@ -1,6 +1,5 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import { Link } from '@inertiajs/react';
-import exp from 'constants';
 
 interface AppHeaderProps {
     sidebarActive: boolean;
@@ -31,8 +30,8 @@ const AppHeaderLayout = forwardRef<HTMLButtonElement, AppHeaderProps>(({ sidebar
     return (
         <header  className="header" style={{ display: hideHeader ? 'none' : 'block' }}>
             <div className="header__content">
-                <Link href="#" className="header__logo">
-                    <img src="/assets/backend/img/logo.svg" alt="Admin Logo" />
+                <Link href="/" className="header__logo">
+                    <img src="/assets/backend/img/logo.png" alt="Admin Logo" />
                 </Link>
 
                 <button

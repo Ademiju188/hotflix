@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
+import { router } from '@inertiajs/react';
 
 interface Episode {
     id: number;
@@ -60,7 +61,7 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
         });
 
         playerRef.current = player;
-        setPlayerInitialized(true);
+        // setPlayerInitialized(true);
 
         // Prevent right-click context menu
         const handleContextMenu = (e: MouseEvent) => {
@@ -86,6 +87,7 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
 
     // Handle episode changes
     useEffect(() => {
+        // console.log(videoRef.current)
         if (!currentEpisode || !playerRef.current || !videoRef.current) return;
 
         const player = playerRef.current;
@@ -131,8 +133,10 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
     }, [currentEpisode, currentPage, episodes]);
 
     const handleEpisodeClick = (episode: Episode) => {
+
         if (episode.is_premium && !userHasAccess) {
-            alert('Please upgrade to premium to watch this episode');
+            // router.push(route('pricing'))
+            router.visit(route('pricing'));
             return;
         }
 
@@ -178,15 +182,17 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
 
     return (
         <div className="row">
-            <div className="col-12 mb-2 pb-2">
+            <div className="col-12 pb-4 mb-4">
                 <div className="section__player" ref={containerRef}>
                     {currentEpisode ? (
-                        <div className="plyr__video-embed">
+                        <div className="plyr plyr--full-ui plyr--video plyr--html5 plyr--paused plyr--stopped plyr--pip-supported plyr--fullscreen-enabled plyr--captions-enabled plyr__poster-enabled">
                             <video
                                 ref={videoRef}
                                 controls
                                 crossOrigin="anonymous"
                                 playsInline
+                                width={`100%`}
+                                height={`400px`}
                                 // poster={currentEpisode.movie_banner}
                                 controlsList="nodownload"
                                 onContextMenu={(e) => e.preventDefault()}
@@ -208,7 +214,7 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
             <div className="col-12">
                 <section style={{ willChange: 'opacity', opacity: 1, height: 'auto', overflowY: 'unset' }}>
                     <div className="py-2" role="region" aria-labelledby="section-title">
-                        <h2>
+                        {/* <h2>
                             <button
                                 className="d-flex py-3 w-100 h-100 gap-2 align-items-center btn btn-link text-start"
                                 type="button"
@@ -241,7 +247,7 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
                                     </svg>
                                 </span>
                             </button>
-                        </h2>
+                        </h2> */}
 
                         {renderPagination()}
 
@@ -253,8 +259,8 @@ const EpisodePlayer: React.FC<EpisodePlayerProps> = ({ episodes, userHasAccess =
                                 return (
                                     <div key={episode.id} className="col-1">
                                         <div
-                                            className={`bg-dark text-white rounded text-center py-2 position-relative ${episode.is_premium ? 'lock' : ''}`}
-                                            onClick={() => handleEpisodeClick(episode)}
+                                            className={`bg-dark text-white rounded text-center py-2 ${episode.is_premium ? 'lock' : ''}`}
+                                            onClick={(e) => handleEpisodeClick(episode)}
                                             style={{
                                                 cursor: 'pointer',
                                                 backgroundColor: isCurrent ? '#007bff' : '',

@@ -15,6 +15,7 @@ class RedirectIfNotSuperAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // dd(user()->isAdmin());
         if (auth()->check() && !user()->isSuperAdmin() && !user()->isAdmin()) {
             return redirect(route('home'))->withErrors("You are Allowed to Access this Page!.");
         }

@@ -31,12 +31,13 @@ const GuestFooter = () => {
                     <div className="col-12">
                         <div className="footer__content">
                             <Link href="/" className="footer__logo">
-                                <img src="/assets/frontend/img/logo.svg" alt="HotFlix Logo" />
+                                <img src="/assets/frontend/img/logo.png" alt="Logo" />
                             </Link>
 
                             <span className="footer__copyright">
-                                © HOTFLIX 2025, All Right Reserved
+                            © {import.meta.env.VITE_APP_NAME} 2025 - {new Date().getFullYear()}, All Rights Reserved
                             </span>
+
 
                             <nav className="footer__nav">
                                 <Link href={route('home')}>Home</Link>

@@ -1,15 +1,28 @@
 <?php
 
+use App\Enums\RolesEnum;
 use App\Http\Controllers\System\CategoryController;
 use App\Http\Controllers\System\HeroSliderSettingsController;
 use App\Http\Controllers\System\MovieController;
 use App\Http\Controllers\System\PricingController;
+use App\Http\Controllers\System\UserController;
+use App\Models\Movie;
+use App\Models\Payment;
+use App\Models\Subscription;
+use App\Models\User;
 use Inertia\Inertia;
 
 
 Route::prefix('system')->middleware(['auth', 'superadmin'])->as('system.')->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('admin/dashboard');
+        return Inertia::render('admin/dashboard', [
+            'users_count' =>  User::whereHas('role', function ($q) {
+                return $q->where('name', RolesEnum::Viewer->value);
+            })->count(),
+            'subscriptions_count'   =>  Subscription::distinct('user_id')->count(),
+            'payments_count'   =>  Payment::distinct('user_id')->count(),
+            'series_count'   =>  Movie::count(),
+        ]);
     })->name('dashboard');
 
     Route::prefix('categories')->as('category.')->group(function () {
@@ -48,5 +61,10 @@ Route::prefix('system')->middleware(['auth', 'superadmin'])->as('system.')->grou
             Route::post('/reorder', [HeroSliderSettingsController::class, 'reorder'])->name('reorder');
             Route::post('/{slider:id}/destroy', [HeroSliderSettingsController::class, 'destroy'])->name('destroy');
         });
+    });
+
+    Route::prefix('users')->as('user.')->group(function() {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('{user:uuid}/show', [UserController::class, 'show'])->name('show');
     });
 });

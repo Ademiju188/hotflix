@@ -20,7 +20,7 @@ class OnlyGuestAllowedMiddleware
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(Auth::user()->dashboard());
+                return redirect(user()->dashboard());
             }
         }
 

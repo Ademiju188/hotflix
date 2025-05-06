@@ -23,6 +23,13 @@ class SubscriptionController extends Controller
 
     public function checkout(Plan $plan)
     {
+        // Check for active subscription
+        if ($this->hasActiveSubscription()) {
+            session()->flash('error', 'You already have an active subscription');
+            return redirect()->route('pricing');
+        }
+
+
         return DB::transaction(function () use ($plan) {
             $payment = $this->processPayment($plan);
 
@@ -170,5 +177,13 @@ class SubscriptionController extends Controller
         }
 
         return response('');
+    }
+
+    protected function hasActiveSubscription(): bool
+    {
+        return auth()->user()->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>', now())
+            ->exists();
     }
 }

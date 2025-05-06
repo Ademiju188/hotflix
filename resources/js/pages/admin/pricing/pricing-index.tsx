@@ -210,7 +210,7 @@ const PricingIndex: React.FC<PricingPlanPros> = ({ pricingPlans, planTypes }) =>
                                         <th>PRICE</th>
                                         <th>DESCRIPTION</th>
                                         <th>STATUS</th>
-                                        <th>CRAETED DATE</th>
+                                        <th>CREATED DATE</th>
                                         <th>ACTIONS</th>
                                     </tr>
                                 </thead>

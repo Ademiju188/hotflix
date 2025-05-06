@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('payment_method')->default('stripe');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->boolean('is_lifetime')->default('false');
+            $table->boolean('is_lifetime')->default(false);
             $table->enum('status', ['active', 'cancelled', 'expired']);
             $table->boolean('auto_renew')->default(false);
             $table->json('meta')->nullable();

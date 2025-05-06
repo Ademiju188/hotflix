@@ -17,6 +17,7 @@ class PlanResource extends JsonResource
         return [
             'id'    =>  $this->id,
             'uuid'  =>  $this->uuid,
+            'name'  =>  $this->name,
             'plan_type'  =>    (new PlanTypeResource($this->planType)),
             'description'   => $this->description,
             'hierarchy' =>  $this->hierarchy,

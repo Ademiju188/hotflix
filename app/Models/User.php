@@ -84,12 +84,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function subscriptions(): HasMany
     {
-        return $this->hasMany(Subscription::class);
+        return $this->hasMany(Subscription::class)->orderBy('created_at', 'desc');;
     }
 
     public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Payment::class)->orderBy('created_at', 'desc');;
     }
 
     public function watchHistory(): MorphMany
@@ -108,5 +108,18 @@ class User extends Authenticatable implements MustVerifyEmail
             ->where('status', 'active')
             ->where('end_date', '>', now())
             ->exists();
+    }
+
+    public function subscription()
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>', now())
+            ->first();
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 }

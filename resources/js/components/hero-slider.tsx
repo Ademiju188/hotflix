@@ -38,7 +38,7 @@ const HeroSlider = ({ sliders }) => {
                                         <p className="hero__text">{slider.movie.description}</p>
                                         <p className="hero__category">
                                             {slider.movie.categories.map(category => (
-                                                <a href="#" key={category.category}>{category.name}</a>
+                                                <a href="#" key={category.id}>{category.name}</a>
                                             ))}
                                         </p>
                                         <div className="hero__actions">

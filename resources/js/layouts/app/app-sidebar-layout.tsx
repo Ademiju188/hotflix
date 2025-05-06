@@ -11,7 +11,7 @@ const AppSidebarLayout = forwardRef<HTMLDivElement, AppSidebarProps>(({ sidebarA
     return (
         <div ref={ref} className={`sidebar ${sidebarActive ? 'sidebar--active' : ''}`}>
             <Link href="#" className="sidebar__logo">
-                <img src="/assets/backend/img/logo.svg" alt="Admin Logo" />
+                <img src="/assets/backend/img/logo.png" alt="Admin Logo" />
             </Link>
 
             <div className="sidebar__user">

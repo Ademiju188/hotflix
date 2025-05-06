@@ -7,6 +7,7 @@ export default function Pricing({ pricingPlans }: PricingPlanPros) {
     const { auth } = usePage<SharedData>().props;
 
     const [processing, setProcessing] = useState(false);
+    const [processingPlanId, setProcessingPlanId] = useState<number | null>(null);
 
     const classes = [
         'plan',
@@ -14,17 +15,16 @@ export default function Pricing({ pricingPlans }: PricingPlanPros) {
         'plan plan--red'
     ];
 
-    const handlePlan = (plan: PricingPlans) => {
+    const handlePlan = async  (plan: PricingPlans) => {
         setProcessing(true);
-        try {
-            router.post(route('process-subscription', plan.uuid), {
-                preserveScroll: true
-            });
-        } catch (error) {
-
-        } finally {
-            setProcessing(false);
-        }
+        setProcessingPlanId(plan.id);
+        await router.post(route('process-subscription', plan.uuid), {}, {
+            preserveScroll: true,
+            onError: (err) => {
+                setProcessing(false);
+                setProcessingPlanId(null);
+            }
+        });
     }
 
     return (
@@ -62,7 +62,20 @@ export default function Pricing({ pricingPlans }: PricingPlanPros) {
                                                 <ul className="plan__list">
                                                     <li className="plan__item">{plan.description}</li>
                                                 </ul>
-                                                <button onClick={e => handlePlan(plan)} disabled={processing} className="plan__btn">Choose Plan</button>
+                                                <button
+                                                    onClick={e => handlePlan(plan)}
+                                                    disabled={processingPlanId === plan.id || processingPlanId !== null}
+                                                    className="plan__btn"
+                                                >
+                                                    {processingPlanId === plan.id ? (
+                                                        <>
+                                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                            Processing...
+                                                        </>
+                                                    ) : (
+                                                        'Choose Plan'
+                                                    )}
+                                                </button>
                                             </div>
                                         </div>
                                     )
